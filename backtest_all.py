@@ -64,15 +64,17 @@ def backtest(name, detect_fn):
         lows   = bars['Low'].values.astype(float)
         opens  = bars['Open'].values.astype(float)
 
-        # 14-day ATR
+        # 14-period ATR (Wilder smoothing)
         at = np.full(n, np.nan)
+        if n < 14:
+            continue
+        tr_list = []
+        for i in range(14):
+            tr_list.append(max(highs[i]-lows[i], abs(highs[i]-closes[i-1]) if i > 0 else highs[i]-lows[i], abs(lows[i]-closes[i-1]) if i > 0 else highs[i]-lows[i]))
+        at[13] = sum(tr_list) / 14
         for i in range(14, n):
-            trs = [max(highs[i]-lows[i], abs(highs[i]-closes[i-1]), abs(lows[i]-closes[i-1]))]
-            for j in range(i-13, i):
-                trs.append(max(highs[j]-lows[j], abs(highs[j]-closes[j-1]), abs(lows[j]-closes[j-1])))
-            at[i] = sum(trs[1:])/14 + (trs[0]-sum(trs[1:])/14)*(2/15) if len(trs) > 1 else trs[0]
-            if i >= 15:
-                at[i] = (at[i-1]*13 + trs[-1])/14
+            tr = max(highs[i]-lows[i], abs(highs[i]-closes[i-1]), abs(lows[i]-closes[i-1]))
+            at[i] = (at[i-1] * 13 + tr) / 14
 
         try:
             raw_signals = detect_fn(bars)
@@ -84,9 +86,8 @@ def backtest(name, detect_fn):
             if direction not in ('long', 'short'):
                 continue
 
-            # Signal bar index
             sig_date = sig.get('date')
-            bar_idx = n - 1  # default: last bar
+            bar_idx = n - 1
             if sig_date is not None:
                 for j in range(n):
                     if str(bars.index[j]) == str(sig_date) or j == sig_date:
@@ -98,12 +99,14 @@ def backtest(name, detect_fn):
                     except (ValueError, TypeError):
                         bar_idx = n - 1
 
-            if bar_idx < 0 or bar_idx >= n - 1:
+            # Need signal bar + next bar for entry/exit
+            if bar_idx < 0 or bar_idx >= n - 2:
                 continue
 
-            entry = float(opens[bar_idx])
-            exit_p = float(closes[bar_idx])
-            atrd = float(at[bar_idx])
+            # entry = next bar open, exit = next bar close
+            entry = float(opens[bar_idx + 1])
+            exit_p = float(closes[bar_idx + 1])
+            atrd = float(at[bar_idx])  # ATR from signal day
             if np.isnan(atrd) or atrd <= 0:
                 continue
 
@@ -116,8 +119,8 @@ def backtest(name, detect_fn):
                 continue
             r = (exit_p - entry)/risk if direction == 'long' else (entry - exit_p)/risk
 
-            hit_sl = (direction=='long' and lows[bar_idx]<=sl) or (direction=='short' and highs[bar_idx]>=sl)
-            hit_tp = tp > 0 and ((direction=='long' and highs[bar_idx]>=tp) or (direction=='short' and lows[bar_idx]<=tp))
+            hit_sl = (direction=='long' and lows[bar_idx+1]<=sl) or (direction=='short' and highs[bar_idx+1]>=sl)
+            hit_tp = tp > 0 and ((direction=='long' and highs[bar_idx+1]>=tp) or (direction=='short' and lows[bar_idx+1]<=tp))
 
             trade = {'sym':sym,'dir':direction,'entry':round(entry,4),'exit':round(exit_p,4),
                      'sl':round(sl,4),'tp':round(tp,4) if tp else 0,'atr':round(atrd,4),

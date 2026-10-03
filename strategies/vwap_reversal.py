@@ -9,10 +9,10 @@ import numpy as np
 
 def detect(df):
     signals = []
-    closes = df['close'].values
-    highs  = df['high'].values
-    lows   = df['low'].values
-    volumes = df['volume'].values if 'volume' in df.columns else np.ones_like(closes)
+    closes = df['Close'].values
+    highs  = df['High'].values
+    lows   = df['Low'].values
+    volumes = df['Volume'].values if 'Volume' in df.columns else np.ones_like(closes)
     n = len(closes)
     if n < 20:
         return signals

@@ -9,9 +9,9 @@ import numpy as np
 
 def detect(df):
     signals = []
-    closes = df['close'].values
-    highs  = df['high'].values
-    lows   = df['low'].values
+    closes = df['Close'].values
+    highs  = df['High'].values
+    lows   = df['Low'].values
     n = len(closes)
     if n < 2:
         return signals
@@ -22,7 +22,7 @@ def detect(df):
             continue
 
         prev_close = closes[i-1]
-        today_open = df['open'].values[i] if 'open' in df.columns else closes[i]
+        today_open = df['Open'].values[i] if 'Open' in df.columns else closes[i]
         entry = today_open
 
         gap_pct = (entry - prev_close) / prev_close * 100

@@ -9,9 +9,9 @@ import numpy as np
 
 def detect(df):
     signals = []
-    closes = df['close'].values
-    highs  = df['high'].values
-    lows   = df['low'].values
+    closes = df['Close'].values
+    highs  = df['High'].values
+    lows   = df['Low'].values
     n = len(closes)
     if n < 26:
         return signals
@@ -61,12 +61,18 @@ def detect(df):
 
 
 def _ema(s, p):
+    """Exponential moving average; skips leading NaNs in input array."""
     n = len(s)
     r = np.full(n, np.nan)
-    r[p-1] = np.mean(s[:p])
-    k = 2 / (p + 1)
-    for i in range(p, n):
-        r[i] = s[i] * k + r[i-1] * (1 - k)
+    # Find first window of p consecutive non-NaN values
+    for start in range(n - p + 1):
+        window = s[start:start + p]
+        if not np.any(np.isnan(window)):
+            r[start + p - 1] = np.mean(window)
+            k = 2 / (p + 1)
+            for i in range(start + p, n):
+                r[i] = s[i] * k + r[i - 1] * (1 - k)
+            return r
     return r
 
 

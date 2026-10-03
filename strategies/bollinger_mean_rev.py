@@ -9,9 +9,9 @@ import numpy as np
 
 def detect(df):
     signals = []
-    closes = df['close'].values
-    highs  = df['high'].values
-    lows   = df['low'].values
+    closes = df['Close'].values
+    highs  = df['High'].values
+    lows   = df['Low'].values
     n = len(closes)
     if n < 20:
         return signals
