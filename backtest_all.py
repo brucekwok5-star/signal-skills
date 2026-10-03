@@ -124,7 +124,7 @@ def backtest(name, detect_fn):
 
             trade = {'sym':sym,'dir':direction,'entry':round(entry,4),'exit':round(exit_p,4),
                      'sl':round(sl,4),'tp':round(tp,4) if tp else 0,'atr':round(atrd,4),
-                     'r':round(r,4),'hit_sl':hit_sl,'hit_tp':hit_tp}
+                     'r':round(r,4),'hit_sl':bool(hit_sl),'hit_tp':bool(hit_tp)}
             all_trades.append(trade)
             (ls if direction == 'long' else ss).append(r)
 
