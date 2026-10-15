@@ -1,0 +1,98 @@
+{
+  "strategy": "short_squeeze",
+  "long": {
+    "n": 6,
+    "wr": 50.0,
+    "avg_r": 0.0793,
+    "total_r": 0.48,
+    "pf": 1.673
+  },
+  "short": {
+    "n": 0,
+    "wr": 0,
+    "avg_r": 0,
+    "total_r": 0,
+    "pf": 0
+  },
+  "combined": {
+    "n": 6,
+    "wr": 50.0,
+    "avg_r": 0.0793,
+    "total_r": 0.48,
+    "pf": 1.673
+  },
+  "trades": [
+    {
+      "sym": "ARM",
+      "dir": "long",
+      "entry": 258.95,
+      "exit": 239.69,
+      "sl": 210.6951,
+      "tp": 0,
+      "atr": 27.5519,
+      "r": -0.3991,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "DELL",
+      "dir": "long",
+      "entry": 486.31,
+      "exit": 516.39,
+      "sl": 400.1444,
+      "tp": 0,
+      "atr": 31.1958,
+      "r": 0.3491,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "HOOD",
+      "dir": "long",
+      "entry": 106.855,
+      "exit": 103.62,
+      "sl": 89.2279,
+      "tp": 0,
+      "atr": 6.1769,
+      "r": -0.1835,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRVL",
+      "dir": "long",
+      "entry": 237.5181,
+      "exit": 250.9552,
+      "sl": 203.6474,
+      "tp": 0,
+      "atr": 18.5564,
+      "r": 0.3967,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "NBIS",
+      "dir": "long",
+      "entry": 200.935,
+      "exit": 190.41,
+      "sl": 116.2673,
+      "tp": 0,
+      "atr": 26.4662,
+      "r": -0.1243,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "ORCL",
+      "dir": "long",
+      "entry": 140.8989,
+      "exit": 144.2565,
+      "sl": 148.5799,
+      "tp": 0,
+      "atr": 7.7471,
+      "r": 0.4371,
+      "hit_sl": true,
+      "hit_tp": false
+    }
+  ]
+}

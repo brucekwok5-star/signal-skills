@@ -1,0 +1,146 @@
+{
+  "strategy": "volatility_breakout",
+  "long": {
+    "n": 7,
+    "wr": 71.4,
+    "avg_r": 0.6032,
+    "total_r": 4.22,
+    "pf": 13.611
+  },
+  "short": {
+    "n": 3,
+    "wr": 66.7,
+    "avg_r": -0.0635,
+    "total_r": -0.19,
+    "pf": 0.59
+  },
+  "combined": {
+    "n": 10,
+    "wr": 70.0,
+    "avg_r": 0.4032,
+    "total_r": 4.03,
+    "pf": 6.043
+  },
+  "trades": [
+    {
+      "sym": "AMZN",
+      "dir": "long",
+      "entry": 276.06,
+      "exit": 277.42,
+      "sl": 264.4376,
+      "tp": 0,
+      "atr": 10.0232,
+      "r": 0.117,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRNA",
+      "dir": "long",
+      "entry": 133.11,
+      "exit": 145.13,
+      "sl": 129.2531,
+      "tp": 0,
+      "atr": 13.9825,
+      "r": 3.1165,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRNA",
+      "dir": "short",
+      "entry": 142.7,
+      "exit": 138.89,
+      "sl": 172.5319,
+      "tp": 0,
+      "atr": 14.9159,
+      "r": 0.1277,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRNA",
+      "dir": "long",
+      "entry": 143.5,
+      "exit": 158.83,
+      "sl": 120.3384,
+      "tp": 0,
+      "atr": 14.9576,
+      "r": 0.6619,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRNA",
+      "dir": "short",
+      "entry": 154.2,
+      "exit": 149.66,
+      "sl": 185.1899,
+      "tp": 0,
+      "atr": 15.495,
+      "r": 0.1465,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MRNA",
+      "dir": "long",
+      "entry": 144.18,
+      "exit": 142.77,
+      "sl": 131.2113,
+      "tp": 0,
+      "atr": 15.3689,
+      "r": -0.1087,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MSFT",
+      "dir": "short",
+      "entry": 449.1545,
+      "exit": 463.8468,
+      "sl": 480.7767,
+      "tp": 0,
+      "atr": 15.8111,
+      "r": -0.4646,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MSFT",
+      "dir": "long",
+      "entry": 475.2354,
+      "exit": 486.7337,
+      "sl": 427.0928,
+      "tp": 0,
+      "atr": 15.9301,
+      "r": 0.2388,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MSFT",
+      "dir": "long",
+      "entry": 479.9964,
+      "exit": 491.884,
+      "sl": 451.8696,
+      "tp": 0,
+      "atr": 16.7122,
+      "r": 0.4226,
+      "hit_sl": false,
+      "hit_tp": false
+    },
+    {
+      "sym": "MSFT",
+      "dir": "long",
+      "entry": 495.4273,
+      "exit": 486.5441,
+      "sl": 456.1319,
+      "tp": 0,
+      "atr": 16.9636,
+      "r": -0.2261,
+      "hit_sl": false,
+      "hit_tp": false
+    }
+  ]
+}
