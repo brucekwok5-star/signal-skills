@@ -123,7 +123,7 @@ def main():
     shorts = [r for r in shorts if (r['p'] - r['mid']) / r['atr'] > 0.5]
     L = sorted(longs, key=lambda r: (-len(tags(r, 'LONG')), -r['atr']))[:3]
     S = sorted(shorts, key=lambda r: (-len(tags(r, 'SHORT')), -r['atr']))[:3]
-    ts = set(live[list(live)[0]]['ts']) if live else '?'
+    ts = next(iter(live.values()))['ts'] if live else '?'
     print(f'Live: {len(live)} quotes @ {ts} | Long signals: {len(longs)} | Short signals: {len(shorts)}')
     print(f'\n{"=" * 82}\nTOP 3 LONG\n{"=" * 82}')
     for r in L: print(show(r, 'LONG'))
