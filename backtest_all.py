@@ -6,6 +6,7 @@ Entry = day Open, Exit = EOD Close.
 Saves results to backtest_results/.
 """
 import json, time, importlib.util, numpy as np, yfinance as yf
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 US_UNIVERSE = [
@@ -15,12 +16,31 @@ US_UNIVERSE = [
     'SPY','STX','TSLA','TSM','WDC','WMT','CRM','SMCI','QQQ'
 ]
 PERIOD = '90d'
+MAX_BARS = 90          # bars kept per symbol (overridable for robustness tests)
 OUT_DIR = Path(__file__).parent / 'backtest_results'
 OUT_DIR.mkdir(exist_ok=True)
 STRAT_DIR = Path(__file__).parent / 'strategies'
 
+def _market_open_now():
+    """True if US market has NOT closed yet (so today's bar is still partial)."""
+    # US equities: 09:30-16:00 ET. ET is UTC-4 (EDT) or UTC-5 (EST).
+    ny = timezone(timedelta(hours=-4))
+    now_ny = datetime.now(timezone.utc).astimezone(ny)
+    if now_ny.weekday() >= 5:          # weekend
+        return False
+    minutes = now_ny.hour * 60 + now_ny.minute
+    return minutes < 16 * 60           # before 16:00 ET close
+
 def get_bars(sym):
-    df = yf.Ticker(sym).history(period=PERIOD, auto_adjust=True).tail(90).reset_index()
+    df = yf.Ticker(sym).history(period=PERIOD, auto_adjust=True).tail(MAX_BARS).reset_index()
+    # Drop the in-progress bar: yfinance returns today's partial bar while the
+    # market is open. Backtesting on it would treat an unfinished session as a
+    # completed day, contaminating the most recent trade's entry/exit.
+    if len(df) >= 20 and _market_open_now():
+        last_date = df['Date'].iloc[-1]
+        last_date = last_date.date() if hasattr(last_date, 'date') else last_date
+        if str(last_date) == str(datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=-4))).date()):
+            df = df.iloc[:-1].reset_index(drop=True)
     return df if len(df) >= 20 else None
 
 def load_strategies():
@@ -110,19 +130,58 @@ def backtest(name, detect_fn):
             if np.isnan(atrd) or atrd <= 0:
                 continue
 
-            sl = float(sig.get('sl', entry - 2*atrd) if direction == 'long' else entry + 2*atrd)
+            # The strategy anchors its SL/TP to the SIGNAL day's open, but we
+            # enter at the NEXT bar's open. Re-anchor the stop to the actual
+            # entry, preserving the strategy's intended stop distance. Without
+            # this, a gap-down makes the stop land at/near entry -> degenerate
+            # risk -> R explodes to hundreds and poisons the mean.
+            sig_entry = float(sig.get('entry', entry))
+            sig_sl = float(sig.get('sl', 0))
+            if sig_sl:
+                stop_dist = abs(sig_entry - sig_sl)
+                sl = entry - stop_dist if direction == 'long' else entry + stop_dist
+            else:
+                sl = entry - 2*atrd if direction == 'long' else entry + 2*atrd
             tp_val = sig.get('tp')
             tp = float(tp_val) if tp_val else 0
+            if tp:
+                tp_dist = abs(sig_entry - float(tp_val))
+                tp = entry + tp_dist if direction == 'long' else entry - tp_dist
 
             risk = abs(entry - sl)
             if risk <= 0:
                 continue
-            r = (exit_p - entry)/risk if direction == 'long' else (entry - exit_p)/risk
+            # Hard guard against degenerate risk: a stop placed essentially AT
+            # the entry price makes R explode into the hundreds and poisons the
+            # mean. Require the stop to be at least 0.1% of entry price away.
+            # (ATR-scaled floors are too strict for fixed-percent-stop
+            # strategies like gap_fill, whose 0.5% stop is legitimately tighter
+            # than 0.25*ATR on high-volatility names.)
+            if risk < 0.001 * entry:
+                continue
 
+            # Exit model: if the stop or target was actually touched during the
+            # entry session, close AT that level. Only fall back to the EOD
+            # close when neither was hit. Ignoring this lets a trade that
+            # blew through its stop report the (much larger) EOD loss, or a
+            # trade that hit its target report a far larger EOD gain -- both
+            # distort the R distribution.
             hit_sl = (direction=='long' and lows[bar_idx+1]<=sl) or (direction=='short' and highs[bar_idx+1]>=sl)
             hit_tp = tp > 0 and ((direction=='long' and highs[bar_idx+1]>=tp) or (direction=='short' and lows[bar_idx+1]<=tp))
 
-            trade = {'sym':sym,'dir':direction,'entry':round(entry,4),'exit':round(exit_p,4),
+            if hit_sl:
+                exit_price = sl
+            elif hit_tp:
+                exit_price = tp
+            else:
+                exit_price = exit_p
+
+            r = (exit_price - entry)/risk if direction == 'long' else (entry - exit_price)/risk
+            # Cap the extreme tail defensively (still lets genuine 3:1 targets
+            # through, but no single trade can dominate the mean).
+            r = max(-2.0, min(5.0, r))
+
+            trade = {'sym':sym,'dir':direction,'entry':round(entry,4),'exit':round(exit_price,4),
                      'sl':round(sl,4),'tp':round(tp,4) if tp else 0,'atr':round(atrd,4),
                      'r':round(r,4),'hit_sl':bool(hit_sl),'hit_tp':bool(hit_tp)}
             all_trades.append(trade)
